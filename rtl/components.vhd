@@ -6,7 +6,7 @@
 -- Author     : Nico De Simone  <nico.desimone@desy.de>
 -- Company    : DESY
 -- Created    : 2023-05-31
--- Last update: 2023-08-29
+-- Last update: 2025-04-10
 -- Platform   :
 -- Standard   : VHDL'08
 -------------------------------------------------------------------------------
@@ -292,5 +292,163 @@ package components is
                   );
       end component axis_cobs_encode;
 
+
+      component axis_srl_fifo is
+        generic (
+                DATA_WIDTH  : integer := 8;
+                KEEP_ENABLE : boolean := (DATA_WIDTH > 8);
+                KEEP_WIDTH  : integer := ((DATA_WIDTH + 7) / 8);
+                LAST_ENABLE : boolean := true;
+                ID_ENABLE   : boolean := false;
+                ID_WIDTH    : integer := 8;
+                DEST_ENABLE : boolean := false;
+                DEST_WIDTH  : integer := 8;
+                USER_ENABLE : boolean := true;
+                USER_WIDTH  : integer := 1;
+                DEPTH       : integer := 16
+                );
+        port (
+                clk : in std_logic;
+                rst : in std_logic;
+
+                s_axis_tdata  : in  unsigned(DATA_WIDTH-1 downto 0);
+                s_axis_tkeep  : in  unsigned(KEEP_WIDTH-1 downto 0);
+                s_axis_tvalid : in  std_logic;
+                s_axis_tready : out std_logic;
+                s_axis_tlast  : in  std_logic;
+                s_axis_tid    : in  unsigned(ID_WIDTH-1 downto 0);
+                s_axis_tdest  : in  unsigned(DEST_WIDTH-1 downto 0);
+                s_axis_tuser  : in  unsigned(USER_WIDTH-1 downto 0);
+
+                m_axis_tdata  : out unsigned(DATA_WIDTH-1 downto 0);
+                m_axis_tkeep  : out unsigned(KEEP_WIDTH-1 downto 0);
+                m_axis_tvalid : out std_logic;
+                m_axis_tready : in  std_logic;
+                m_axis_tlast  : out std_logic;
+                m_axis_tid    : out unsigned(ID_WIDTH-1 downto 0);
+                m_axis_tdest  : out unsigned(DEST_WIDTH-1 downto 0);
+                m_axis_tuser  : out unsigned(USER_WIDTH-1 downto 0);
+
+                count         : out unsigned(ceil_log2(DEPTH + 1)-1 downto 0)
+                );
+      end component axis_srl_fifo;
+
+      component axis_srl_register is
+        generic (
+                DATA_WIDTH  : integer := 8;
+                KEEP_ENABLE : boolean := (DATA_WIDTH > 8);
+                KEEP_WIDTH  : integer := ((DATA_WIDTH + 7) / 8);
+                LAST_ENABLE : boolean := true;
+                ID_ENABLE   : boolean := false;
+                ID_WIDTH    : integer := 8;
+                DEST_ENABLE : boolean := false;
+                DEST_WIDTH  : integer := 8;
+                USER_ENABLE : boolean := true;
+                USER_WIDTH  : integer := 1
+                );
+        port (
+                clk : in std_logic;
+                rst : in std_logic;
+
+                s_axis_tdata  : in  unsigned(DATA_WIDTH-1 downto 0);
+                s_axis_tkeep  : in  unsigned(KEEP_WIDTH-1 downto 0);
+                s_axis_tvalid : in  std_logic;
+                s_axis_tready : out std_logic;
+                s_axis_tlast  : in  std_logic;
+                s_axis_tid    : in  unsigned(ID_WIDTH-1 downto 0);
+                s_axis_tdest  : in  unsigned(DEST_WIDTH-1 downto 0);
+                s_axis_tuser  : in  unsigned(USER_WIDTH-1 downto 0);
+
+                m_axis_tdata  : out unsigned(DATA_WIDTH-1 downto 0);
+                m_axis_tkeep  : out unsigned(KEEP_WIDTH-1 downto 0);
+                m_axis_tvalid : out std_logic;
+                m_axis_tready : in  std_logic;
+                m_axis_tlast  : out std_logic;
+                m_axis_tid    : out unsigned(ID_WIDTH-1 downto 0);
+                m_axis_tdest  : out unsigned(DEST_WIDTH-1 downto 0);
+                m_axis_tuser  : out unsigned(USER_WIDTH-1 downto 0)
+                );
+      end component axis_srl_register;
+
+      component axis_pipeline_register is
+        generic (
+                DATA_WIDTH  : integer := 8;
+                KEEP_ENABLE : boolean := (DATA_WIDTH > 8);
+                KEEP_WIDTH  : integer := ((DATA_WIDTH + 7) / 8);
+                LAST_ENABLE : boolean := true;
+                ID_ENABLE   : boolean := false;
+                ID_WIDTH    : integer := 8;
+                DEST_ENABLE : boolean := false;
+                DEST_WIDTH  : integer := 8;
+                USER_ENABLE : boolean := true;
+                USER_WIDTH  : integer := 1;
+                REG_TYPE    : integer := 2;
+                LENGTH      : integer := 2
+                );
+        port (
+                clk : in std_logic;
+                rst : in std_logic;
+
+                s_axis_tdata  : in  unsigned(DATA_WIDTH-1 downto 0);
+                s_axis_tkeep  : in  unsigned(KEEP_WIDTH-1 downto 0);
+                s_axis_tvalid : in  std_logic;
+                s_axis_tready : out std_logic;
+                s_axis_tlast  : in  std_logic;
+                s_axis_tid    : in  unsigned(ID_WIDTH-1 downto 0);
+                s_axis_tdest  : in  unsigned(DEST_WIDTH-1 downto 0);
+                s_axis_tuser  : in  unsigned(USER_WIDTH-1 downto 0);
+
+                m_axis_tdata  : out unsigned(DATA_WIDTH-1 downto 0);
+                m_axis_tkeep  : out unsigned(KEEP_WIDTH-1 downto 0);
+                m_axis_tvalid : out std_logic;
+                m_axis_tready : in  std_logic;
+                m_axis_tlast  : out std_logic;
+                m_axis_tid    : out unsigned(ID_WIDTH-1 downto 0);
+                m_axis_tdest  : out unsigned(DEST_WIDTH-1 downto 0);
+                m_axis_tuser  : out unsigned(USER_WIDTH-1 downto 0)
+                );
+      end component axis_pipeline_register;
+
+      component axis_arb_mux is
+        generic (
+                S_COUNT               : integer := 4;
+                DATA_WIDTH            : integer := 8;
+                KEEP_ENABLE           : boolean := (DATA_WIDTH > 8);
+                KEEP_WIDTH            : integer := ((DATA_WIDTH + 7) / 8);
+                ID_ENABLE             : boolean := false;
+                S_ID_WIDTH            : integer := 8;
+                M_ID_WIDTH            : integer := S_ID_WIDTH + ceil_log2(S_COUNT);
+                DEST_ENABLE           : boolean := false;
+                DEST_WIDTH            : integer := 8;
+                USER_ENABLE           : boolean := true;
+                USER_WIDTH            : integer := 1;
+                LAST_ENABLE           : boolean := true;
+                UPDATE_TID            : boolean := false;
+                ARB_TYPE_ROUND_ROBIN  : boolean := false;
+                ARB_LSB_HIGH_PRIORITY : boolean := true
+        );
+        port (
+                clk : in std_logic;
+                rst : in std_logic;
+
+                s_axis_tdata  : in  unsigned(S_COUNT*DATA_WIDTH-1 downto 0);
+                s_axis_tkeep  : in  unsigned(S_COUNT*KEEP_WIDTH-1 downto 0);
+                s_axis_tvalid : in  std_logic_vector(S_COUNT-1 downto 0);
+                s_axis_tready : out std_logic_vector(S_COUNT-1 downto 0);
+                s_axis_tlast  : in  std_logic_vector(S_COUNT-1 downto 0);
+                s_axis_tid    : in  unsigned(S_COUNT*S_ID_WIDTH-1 downto 0);
+                s_axis_tdest  : in  unsigned(S_COUNT*DEST_WIDTH-1 downto 0);
+                s_axis_tuser  : in  unsigned(S_COUNT*USER_WIDTH-1 downto 0);
+
+                m_axis_tdata  : out unsigned(DATA_WIDTH-1 downto 0);
+                m_axis_tkeep  : out unsigned(KEEP_WIDTH-1 downto 0);
+                m_axis_tvalid : out std_logic;
+                m_axis_tready : in  std_logic;
+                m_axis_tlast  : out std_logic;
+                m_axis_tid    : out unsigned(M_ID_WIDTH-1 downto 0);
+                m_axis_tdest  : out unsigned(DEST_WIDTH-1 downto 0);
+                m_axis_tuser  : out unsigned(USER_WIDTH-1 downto 0)
+            );
+        end component axis_arb_mux;
 
 end package components;
